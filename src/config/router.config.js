@@ -15,6 +15,27 @@ export const asyncRouterMap = [
     meta: { title: 'menu.home' },
     redirect: '/dashboard/workplace',
     children: [
+      {
+        path: '/reassign',
+        name: 'reassign',
+        redirect: '/reassign/chain',
+        component: RouteView,
+        meta: { title: 'menu.reassign', keepAlive: true, icon: bxAnaalyse, permission: ['reassign'] },
+        children: [
+          {
+            path: '/reassign/chain',
+            name: '流程管理',
+            component: () => import('@/views/reassign/ChainList'),
+            meta: { title: 'menu.reassign.chain', keepAlive: true, permission: ['chain'] }
+          },
+          {
+            path: '/reassign/rule',
+            name: '规则管理',
+            component: () => import('@/views/dashboard/Workplace'),
+            meta: { title: 'menu.reassign.rule', keepAlive: true, permission: ['rule'] }
+          }
+        ]
+      },
       // dashboard
       {
         path: '/dashboard',

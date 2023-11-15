@@ -48,7 +48,10 @@ module.exports = {
         'beforeStatementContinuationChars': 'never'
       }
     ],
+    'comma-dangle': 'warn',
     'no-delete-var': 2,
+    'no-unused-vars': 'warn',
+    'vue/no-unused-vars': 'off',
     'prefer-const': [
       2,
       {

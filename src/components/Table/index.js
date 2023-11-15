@@ -27,6 +27,10 @@ export default {
       type: Function,
       required: true
     },
+    expandIconColumnIndex: {
+      type: Number,
+      default: 1
+    },
     pageNum: {
       type: Number,
       default: 1

@@ -1,6 +1,9 @@
 export default {
     'menu.welcome': '欢迎',
     'menu.home': '主页',
+    'menu.reassign': '分流管理',
+    'menu.reassign.chain': '流程管理',
+    'menu.reassign.rule': '规则管理',
     'menu.dashboard': '仪表盘',
     'menu.dashboard.analysis': '分析页',
     'menu.dashboard.monitor': '监控页',
