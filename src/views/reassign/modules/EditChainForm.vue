@@ -37,56 +37,75 @@ import { Stencil } from '@antv/x6-plugin-stencil'
 import { Snapline } from '@antv/x6-plugin-snapline'
 import { Keyboard } from '@antv/x6-plugin-keyboard'
 import { Selection } from '@antv/x6-plugin-selection'
+import ScriptNode from '@/views/reassign/components/ScriptNode'
+import IfScriptNode from '@/views/reassign/components/IfScriptNode'
+import { register } from '@antv/x6-vue-shape'
 import insertCss from 'insert-css'
 import validateEdgeByScript, { ports } from './script'
 import validateEdgeByIfScript, { ifPorts } from './ifScript'
 import { saveChain } from '@/api/chain'
 import { nodeGroup } from '@/api/ruleNode'
 
-Graph.registerNode(
-  'script',
-  {
-    inherit: 'rect',
-    width: 50,
-    height: 30,
-    attrs: {
-      body: {
-        strokeWidth: 1,
-        stroke: '#5F95FF',
-        fill: '#EFF4FF'
-      },
-      text: {
-        fontSize: 12,
-        fill: '#262626'
-      }
-    },
-    ports: ports
-  },
-  true
-)
+// Graph.registerNode(
+//   'script',
+//   {
+//     inherit: 'rect',
+//     width: 50,
+//     height: 30,
+//     attrs: {
+//       body: {
+//         strokeWidth: 1,
+//         stroke: '#5F95FF',
+//         fill: '#EFF4FF'
+//       },
+//       text: {
+//         fontSize: 12,
+//         fill: '#262626'
+//       }
+//     },
+//     ports: ports
+//   },
+//   true
+// )
+register({
+  shape: 'script',
+  inherit: 'vue-shape',
+  width: 70,
+  height: 40,
+  ports: ports,
+  component: ScriptNode
+})
+register({
+  shape: 'if_script',
+  inherit: 'vue-shape',
+  width: 80,
+  height: 40,
+  ports: ifPorts,
+  component: IfScriptNode
+})
 
-Graph.registerNode(
-  'if_script',
-  {
-    inherit: 'polygon',
-    width: 80,
-    height: 50,
-    attrs: {
-      body: {
-        strokeWidth: 1,
-        stroke: '#5F95FF',
-        fill: '#EFF4FF',
-        refPoints: '0,10 10,0 20,10 10,20'
-      },
-      text: {
-        fontSize: 12,
-        fill: '#262626'
-      }
-    },
-    ports: ifPorts
-  },
-  true
-)
+// Graph.registerNode(
+//   'if_script',
+//   {
+//     inherit: 'polygon',
+//     width: 80,
+//     height: 50,
+//     attrs: {
+//       body: {
+//         strokeWidth: 1,
+//         stroke: '#5F95FF',
+//         fill: '#EFF4FF',
+//         refPoints: '0,10 10,0 20,10 10,20'
+//       },
+//       text: {
+//         fontSize: 12,
+//         fill: '#262626'
+//       }
+//     },
+//     ports: ifPorts
+//   },
+//   true
+// )
 
 export default {
   name: 'EditChainForm',
@@ -227,7 +246,7 @@ export default {
       this.portRelatedAsSourceCountMap = {}
       this.portRelatedAsTargetCountMap = {}
     },
-    buildDataFromCells (cells) {
+    buildDataFromCells (cells, graph) {
       if (!cells) {
         return
       }
@@ -239,8 +258,10 @@ export default {
         } else {
           // 节点
           this.recordCellShape(cell)
+          cell.data.rerender = true
         }
       })
+      graph.fromJSON(cells)
     },
     initGraph () {
       insertCss(`
@@ -387,6 +408,8 @@ export default {
       graph.use(new Selection())
 
       graph.on('node:added', ({ node, index, options }) => {
+        console.log('node added')
+        node.setData({ onGraph: true })
         this.recordCellShape(node)
       })
       graph.on('edge:removed', ({ edge, index, options }) => {
@@ -440,7 +463,8 @@ export default {
         const nodesInGroup = this.nodesGroupDef[key] || []
         const newNodeList = []
         nodesInGroup.forEach(item => {
-          newNodeList.push(graph.createNode(item))
+          // newNodeList.push(graph.createNode(item))
+          newNodeList.push(graph.createNode({ ...item, data: { label: item.label, paramKeyDef: item.paramKeyDef } }))
         })
         stencil.load(newNodeList, key)
       }
@@ -450,10 +474,7 @@ export default {
       if (this.model.chartData) {
         const chartData = this.model['chartData']
         const cd = JSON.parse(chartData)
-        this.buildDataFromCells(cd.cells)
-        if (cd.cells) {
-          graph.fromJSON(cd.cells)
-        }
+        this.buildDataFromCells(cd.cells, graph)
       }
 
       this.graph = graph

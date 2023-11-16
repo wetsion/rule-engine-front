@@ -282,11 +282,14 @@ export default {
     formatTime (time) {
       return moment(parseInt(time) * 1000).format('yyyy/MM/DD HH:mm:ss')
     },
+    clearExpandRow () {
+      this.expandedRowKeys = []
+      this.snapshotRows = []
+      this.snapshotPagination = {}
+    },
     expandRow (expanded) {
       if (this.expandedRowKeys.find(item => expanded.record.id === item)) {
-        this.expandedRowKeys = []
-        this.snapshotRows = []
-        this.snapshotPagination = {}
+        this.clearExpandRow()
       } else {
         this.expandedRowKeys = []
         this.expandedRowKeys.push(expanded.record.id)
@@ -315,6 +318,7 @@ export default {
       })
     },
     loadData (pagination, filters, sorter) {
+      this.clearExpandRow()
       const pager = { ...this.pagination }
       pager.current = (pagination && pagination.current) || 1
       pager.pageSize = (pagination && pagination.pageSize) || 10
