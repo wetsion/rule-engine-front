@@ -54,6 +54,8 @@
 </template>
 
 <script>
+import pick from 'lodash.pick'
+
 const formItemLayout = {
   labelCol: { span: 6 },
   wrapperCol: { span: 6 }
@@ -68,6 +70,7 @@ export default {
       onGraph: false,
       formVisible: false,
       label: '',
+      code: '',
       paramKeyDef: [],
       properties: {}
     }
@@ -78,22 +81,34 @@ export default {
     }
   },
   mounted () {
+    this.paramKeyDef.forEach(v => this.form.getFieldDecorator(v))
+    if (this.rerender) {
+      if (this.paramKeyDef.length > 0) {
+        const rd = pick(this.properties, this.paramKeyDef)
+        this.form.setFieldsValue(rd)
+      }
+    }
+  },
+  created () {
     const self = this
     const node = this.getNode()
-    const { onGraph, label, paramKeyDef } = node.getData()
+    console.log(node.getData())
+    const { onGraph, label, code, paramKeyDef, properties, rerender } = node.getData()
     self.onGraph = onGraph
     self.label = label
-    self.paramKeyDef = paramKeyDef
-
-    paramKeyDef.forEach(v => this.form.getFieldDecorator(v))
+    self.code = code
+    self.paramKeyDef = paramKeyDef || []
+    self.properties = properties
+    self.rerender = rerender || false
 
     node.on('change:data', ({ current }) => {
       self.onGraph = current.onGraph
       self.label = current.label
       self.paramKeyDef = current.paramKeyDef
       self.properties = current.properties
+      self.rerender = current.rerender || false
     })
-    if (onGraph && paramKeyDef.length > 0) {
+    if (!this.rerender && this.onGraph && this.paramKeyDef.length > 0) {
       this.formVisible = true
     }
   },
@@ -101,6 +116,7 @@ export default {
     clickNode () {
       if (this.paramKeyDef.length > 0) {
         console.log('click')
+        console.log(this.properties)
         this.formVisible = true
       } else {
         this.$notification['warn']({
@@ -109,6 +125,7 @@ export default {
       }
     },
     handleOk (e) {
+      // 保存，将当前输入的值更新到节点的data
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
@@ -116,10 +133,20 @@ export default {
           console.log(this.properties)
           this.formVisible = false
           const node = this.getNode()
-          const pps = values.properties
           node.setData({
-            properties: pps
+            properties: values
           })
+        }
+      })
+    },
+    handleCancel (e) {
+      // 取消，删除当前输入的值，用修改前的数据覆盖回去
+      e.preventDefault()
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          const rd = pick(this.properties, this.paramKeyDef)
+          this.form.setFieldsValue(rd)
+          this.formVisible = false
         }
       })
     }

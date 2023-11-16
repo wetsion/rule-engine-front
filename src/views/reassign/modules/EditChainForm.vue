@@ -464,7 +464,7 @@ export default {
         const newNodeList = []
         nodesInGroup.forEach(item => {
           // newNodeList.push(graph.createNode(item))
-          newNodeList.push(graph.createNode({ ...item, data: { label: item.label, paramKeyDef: item.paramKeyDef } }))
+          newNodeList.push(graph.createNode({ ...item, data: { label: item.label, paramKeyDef: item.paramKeyDef, code: item.code } }))
         })
         stencil.load(newNodeList, key)
       }

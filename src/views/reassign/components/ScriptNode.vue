@@ -78,6 +78,7 @@ export default {
       formVisible: false,
       // 节点名，持久化到db
       label: '',
+      code: '',
       // 参数列表，持久化到db
       paramKeyDef: [],
       // 参数值，持久化到db
@@ -102,9 +103,10 @@ export default {
     const self = this
     const node = this.getNode()
     console.log(node.getData())
-    const { onGraph, label, paramKeyDef, properties, rerender } = node.getData()
+    const { onGraph, label, code, paramKeyDef, properties, rerender } = node.getData()
     self.onGraph = onGraph
     self.label = label
+    self.code = code
     self.paramKeyDef = paramKeyDef || []
     self.properties = properties
     self.rerender = rerender || false
