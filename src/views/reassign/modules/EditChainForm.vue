@@ -43,30 +43,11 @@ import { register } from '@antv/x6-vue-shape'
 import insertCss from 'insert-css'
 import validateEdgeByScript, { ports } from './script'
 import validateEdgeByIfScript, { ifPorts } from './ifScript'
+import validateEdgeByStart, { startPorts } from './startScript'
+import validateEdgeByFinish, { finishPorts } from './finishScript'
 import { saveChain } from '@/api/chain'
 import { nodeGroup } from '@/api/ruleNode'
 
-// Graph.registerNode(
-//   'script',
-//   {
-//     inherit: 'rect',
-//     width: 50,
-//     height: 30,
-//     attrs: {
-//       body: {
-//         strokeWidth: 1,
-//         stroke: '#5F95FF',
-//         fill: '#EFF4FF'
-//       },
-//       text: {
-//         fontSize: 12,
-//         fill: '#262626'
-//       }
-//     },
-//     ports: ports
-//   },
-//   true
-// )
 register({
   shape: 'script',
   inherit: 'vue-shape',
@@ -84,28 +65,48 @@ register({
   component: IfScriptNode
 })
 
-// Graph.registerNode(
-//   'if_script',
-//   {
-//     inherit: 'polygon',
-//     width: 80,
-//     height: 50,
-//     attrs: {
-//       body: {
-//         strokeWidth: 1,
-//         stroke: '#5F95FF',
-//         fill: '#EFF4FF',
-//         refPoints: '0,10 10,0 20,10 10,20'
-//       },
-//       text: {
-//         fontSize: 12,
-//         fill: '#262626'
-//       }
-//     },
-//     ports: ifPorts
-//   },
-//   true
-// )
+Graph.registerNode(
+  'start',
+  {
+    inherit: 'ellipse',
+    width: 50,
+    height: 50,
+    attrs: {
+      body: {
+        strokeWidth: 1,
+        stroke: '#5F95FF',
+        fill: '#EFF4FF'
+      },
+      text: {
+        fontSize: 12,
+        fill: '#262626'
+      }
+    },
+    ports: startPorts
+  },
+  true
+)
+Graph.registerNode(
+  'finish',
+  {
+    inherit: 'ellipse',
+    width: 50,
+    height: 50,
+    attrs: {
+      body: {
+        strokeWidth: 1,
+        stroke: '#5F95FF',
+        fill: '#EFF4FF'
+      },
+      text: {
+        fontSize: 12,
+        fill: '#262626'
+      }
+    },
+    ports: finishPorts
+  },
+  true
+)
 
 export default {
   name: 'EditChainForm',
@@ -127,7 +128,9 @@ export default {
     return {
       validateEdgeMap: {
         'script': validateEdgeByScript,
-        'if_script': validateEdgeByIfScript
+        'if_script': validateEdgeByIfScript,
+        'start': validateEdgeByStart,
+        'finish': validateEdgeByFinish
       },
       // stencil 组定义
       groupsDef: [],
@@ -202,6 +205,9 @@ export default {
         })
       }).catch(error => {
         console.log(error)
+        this.$notification['error']({
+          message: error.response.data.errorMsg
+        })
       })
     },
     // 展示连接桩
@@ -353,7 +359,7 @@ export default {
           anchor: 'center',
           connectionPoint: 'anchor',
           allowBlank: false,
-          allowMulti: false,
+          allowMulti: true,
           snap: {
             radius: 20
           },
