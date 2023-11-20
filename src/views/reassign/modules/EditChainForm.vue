@@ -137,6 +137,7 @@ export default {
       // stencil 组下的节点定义
       nodesGroupDef: [],
       comment: '',
+      edgeUniqArr: [],
       // 连接点作为来源的计数
       portRelatedAsSourceCountMap: {},
       // 连接点作为目标的计数
@@ -216,6 +217,17 @@ export default {
         ports[i].style.visibility = show ? 'visible' : 'hidden'
       }
     },
+    removeEdge (edge) {
+      const uniqEdge = edge.source.cell + '_' + edge.target.cell + '_' + edge.id
+      const uniqEdge2 = edge.target.cell + '_' + edge.source.cell + '_' + edge.id
+      this.edgeUniqArr = this.edgeUniqArr.filter(e => e !== uniqEdge && e !== uniqEdge2)
+    },
+    recordUniqEdge (edge) {
+      const uniqEdge = edge.source.cell + '_' + edge.target.cell + '_' + edge.id
+      if (!this.edgeUniqArr.includes(uniqEdge)) {
+        this.edgeUniqArr.push(uniqEdge)
+      }
+    },
     recordPortRelatedCount (edge) {
       const uniqSourcePort = edge.source.cell + '_' + edge.source.port
       const uniqTargetPort = edge.target.cell + '_' + edge.target.port
@@ -238,8 +250,9 @@ export default {
       if (!sourceCellShape || !targetCellShape) {
         return true
       }
-      return this.validateEdgeMap[sourceCellShape](edge, this.cellIdMap, this.portRelatedAsSourceCountMap, this.portRelatedAsTargetCountMap) &&
-        this.validateEdgeMap[targetCellShape](edge, this.cellIdMap, this.portRelatedAsSourceCountMap, this.portRelatedAsTargetCountMap)
+      const eua = this.edgeUniqArr
+      return this.validateEdgeMap[sourceCellShape](edge, this.cellIdMap, eua, this.portRelatedAsSourceCountMap, this.portRelatedAsTargetCountMap) &&
+        this.validateEdgeMap[targetCellShape](edge, this.cellIdMap, eua, this.portRelatedAsSourceCountMap, this.portRelatedAsTargetCountMap)
     },
     resetChartData () {
       this.comment = null
@@ -249,6 +262,7 @@ export default {
       }
       this.cellShapeMap = {}
       this.cellIdMap = {}
+      this.edgeUniqArr = []
       this.portRelatedAsSourceCountMap = {}
       this.portRelatedAsTargetCountMap = {}
     },
@@ -261,6 +275,7 @@ export default {
           // 边
           this.recordCellShape(cell)
           this.recordPortRelatedCount(cell)
+          this.recordUniqEdge(cell)
         } else {
           // 节点
           this.recordCellShape(cell)
@@ -387,12 +402,13 @@ export default {
           },
           validateEdge ({ edge }) {
             console.log(edge)
+            // 记录点关联的次数
+            that.recordPortRelatedCount(edge)
             // 校验边是否可以创建
             if (!that.checkEdgeValid(edge)) {
               return false
             }
-            // 记录点关联的次数
-            that.recordPortRelatedCount(edge)
+            that.recordUniqEdge(edge)
             return true
           }
         },
@@ -421,6 +437,7 @@ export default {
       graph.on('edge:removed', ({ edge, index, options }) => {
         console.log('edge remove')
         console.log(edge)
+        this.removeEdge(edge)
         this.minusPortRelatedCount(edge)
       })
       // 控制连接桩显示/隐藏

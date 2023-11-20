@@ -1,3 +1,5 @@
+import { checkEdgeExist } from '@/views/reassign/modules/commonValidateNode'
+
 const ifPorts = {
   groups: {
     top: {
@@ -63,8 +65,12 @@ export { ifPorts }
 
 const type = 'if_script'
 
-export default function validateEdge (edge, cellIdMap, portRelatedAsSourceCountMap, portRelatedAsTargetCountMap) {
+export default function validateEdge (edge, cellIdMap, edgeUniqArr, portRelatedAsSourceCountMap, portRelatedAsTargetCountMap) {
   console.log('if-script')
+  if (checkEdgeExist(edge, edgeUniqArr)) {
+    console.log('if check false')
+    return false
+  }
   const sourceCell = cellIdMap[edge.source.cell]
   const targetCell = cellIdMap[edge.target.cell]
   if (targetCell.shape === type) {

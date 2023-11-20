@@ -1,3 +1,5 @@
+import { checkEdgeExist, checkEdgeLimit } from '@/views/reassign/modules/commonValidateNode'
+
 const ports = {
   groups: {
     top: {
@@ -44,21 +46,6 @@ const ports = {
           }
         }
       }
-    },
-    left: {
-      position: 'left',
-      attrs: {
-        circle: {
-          r: 4,
-          magnet: true,
-          stroke: '#5F95FF',
-          strokeWidth: 1,
-          fill: '#fff',
-          style: {
-            visibility: 'hidden'
-          }
-        }
-      }
     }
   },
   items: [
@@ -70,16 +57,20 @@ const ports = {
     },
     {
       group: 'bottom'
-    },
-    {
-      group: 'left'
     }
   ]
 }
 
 export { ports }
 
-export default function validateEdge (edge, cellIdMap, portRelatedAsSourceCountMap, portRelatedAsTargetCountMap) {
+export default function validateEdge (edge, cellIdMap, edgeUniqArr, portRelatedAsSourceCountMap, portRelatedAsTargetCountMap) {
   console.log('script')
+  if (checkEdgeExist(edge, edgeUniqArr)) {
+    console.log('check false')
+    return false
+  }
+  if (checkEdgeLimit(edge, edgeUniqArr)) {
+    return false
+  }
   return true
 }

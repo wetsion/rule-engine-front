@@ -1,3 +1,5 @@
+import { checkEdgeExist } from '@/views/reassign/modules/commonValidateNode'
+
 const finishPorts = {
   groups: {
     top: {
@@ -81,7 +83,11 @@ export { finishPorts }
 
 const type = 'finish'
 
-export default function validateEdge (edge, cellIdMap, portRelatedAsSourceCountMap, portRelatedAsTargetCountMap) {
+export default function validateEdge (edge, cellIdMap, edgeUniqArr, portRelatedAsSourceCountMap, portRelatedAsTargetCountMap) {
+  if (checkEdgeExist(edge, edgeUniqArr)) {
+    console.log('if check false')
+    return false
+  }
   const sourceCell = cellIdMap[edge.source.cell]
   if (sourceCell.shape === type) {
     // 结束节点不能作为起始节点
