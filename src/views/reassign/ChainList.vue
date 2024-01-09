@@ -105,7 +105,19 @@
 
         <span slot="action" slot-scope="text, record">
           <template>
-            <a @click="handleEdit(record)">编排</a>
+            <a-tooltip placement="top">
+              <template slot="title">
+                <span>流程图编排</span>
+              </template>
+              <a-button type="primary" shape="circle" icon="fork" @click="handleEdit(record)" />
+            </a-tooltip>
+            &nbsp;
+            <a-tooltip placement="top">
+              <template slot="title">
+                <span>表达式编排</span>
+              </template>
+              <a-button type="primary" shape="circle" icon="code" @click="handleEditExpression" />
+            </a-tooltip>
           </template>
         </span>
       </a-table>
@@ -126,6 +138,14 @@
         @cancel="handleCancel"
         @ok="handleOk"
       />
+      <edit-expression-form
+        ref="editExpressionModal"
+        :visible="expressionVisible"
+        :loading="expressionLoading"
+        :model="elMdl"
+        @cancel="handleExpressionCancel"
+        @ok="handleExpressionOk"
+      />
     </a-card>
   </page-header-wrapper>
 </template>
@@ -137,6 +157,7 @@ import { getChainList, getSnapshots, renderFromChain, renderFromSnapshot } from 
 
 import StepByStepModal from './modules/StepByStepModal'
 import EditChainForm from './modules/EditChainForm'
+import EditExpressionForm from './modules/EditExpressionForm'
 import CreateForm from './modules/CreateForm'
 
 const snapshotColumns = [
@@ -228,6 +249,7 @@ export default {
     STable,
     Ellipsis,
     EditChainForm,
+    EditExpressionForm,
     CreateForm,
     StepByStepModal
   },
@@ -235,12 +257,16 @@ export default {
     this.columns = columns
     this.snapshotColumns = snapshotColumns
     return {
+      expressionVisible: false,
+      expressionLoading: false,
+      expressionConfirmLoading: false,
       // create model
       createVisible: false,
       visible: false,
       createConfirmLoading: false,
       confirmLoading: false,
       mdl: null,
+      elMdl: null,
       // 高级搜索 展开/关闭
       advanced: false,
       // 查询参数
@@ -364,6 +390,9 @@ export default {
         })
       })
     },
+    handleEditExpression (record) {
+      this.expressionVisible = true
+    },
     handleEdit (record) {
       renderFromChain({ chainId: record.id }).then(res => {
         this.visible = true
@@ -397,12 +426,25 @@ export default {
         this.confirmLoading = false
       }, 500)
     },
+    handleExpressionOk () {
+      this.elMdl = null
+      this.expressionConfirmLoading = true
+      this.loadData()
+      window.setTimeout(() => {
+        this.expressionVisible = false
+        this.expressionConfirmLoading = false
+      }, 500)
+    },
     handleCreateCancel () {
       this.createVisible = false
     },
     handleCancel () {
       this.visible = false
       this.mdl = null
+    },
+    handleExpressionCancel () {
+      this.expressionVisible = false
+      this.elMdl = null
     },
     handleSub (record) {
       if (record.status !== 0) {
